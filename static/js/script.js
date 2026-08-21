@@ -45,13 +45,29 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
     // Contact and career forms
-    document.querySelectorAll('form[data-ajax]').forEach(form => {
+    const WHATSAPP_NUMBER = '5521988784497';
+    const forms = document.querySelectorAll('form[data-ajax]');
+    forms.forEach(form => {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = form.querySelector('button[type="submit"]');
             const originalText = btn.textContent;
             btn.disabled = true;
             btn.textContent = 'Enviando...';
+
+            const sendToWhatsApp = () => {
+                const fd = new FormData(form);
+                const linhas = [];
+                fd.forEach((valor, chave) => {
+                    if (chave === 'curriculo') return;
+                    const v = String(valor).trim();
+                    if (v) linhas.push(`${chave}: ${v}`);
+                });
+                const msg = 'Olá! Recebi pelo site Vida Leve:\n\n' + linhas.join('\n');
+                const url = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg);
+                window.open(url, '_blank', 'noopener');
+                showToast('Abrindo WhatsApp para enviar sua mensagem...');
+            };
 
             try {
                 const res = await fetch(form.getAttribute('action'), {
@@ -71,10 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     form.reset();
                     showToast(data.mensagem || 'Enviado com sucesso!');
                 } else {
-                    showToast(data.erro || data.mensagem || 'Erro ao enviar.', 'error');
+                    sendToWhatsApp();
                 }
             } catch (err) {
-                showToast('Erro de conexão.', 'error');
+                sendToWhatsApp();
             } finally {
                 btn.disabled = false;
                 btn.textContent = originalText;
