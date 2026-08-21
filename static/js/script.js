@@ -1,4 +1,4 @@
-https://github.com/edukovack-sketch/vida-leve.gitdocument.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     // Navbar
     const nav = document.querySelector('.navbar');
     const toggle = document.querySelector('.nav-toggle');
@@ -44,9 +44,8 @@ https://github.com/edukovack-sketch/vida-leve.gitdocument.addEventListener('DOMC
 
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-    // Contact form
-    const form = document.getElementById('contactForm');
-    if (form) {
+    // Contact and career forms
+    document.querySelectorAll('form[data-ajax]').forEach(form => {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = form.querySelector('button[type="submit"]');
@@ -55,19 +54,24 @@ https://github.com/edukovack-sketch/vida-leve.gitdocument.addEventListener('DOMC
             btn.textContent = 'Enviando...';
 
             try {
-                const res = await fetch('/contato', {
+                const res = await fetch(form.getAttribute('action'), {
                     method: 'POST',
                     body: new FormData(form),
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
 
-                const data = await res.json();
+                let data = {};
+                try {
+                    data = await res.json();
+                } catch (err) {
+                    data = {};
+                }
 
-                if (data.sucesso) {
+                if (res.ok && data.sucesso) {
                     form.reset();
-                    showToast('Mensagem enviada com sucesso!');
+                    showToast(data.mensagem || 'Enviado com sucesso!');
                 } else {
-                    showToast(data.mensagem || 'Erro ao enviar.', 'error');
+                    showToast(data.erro || data.mensagem || 'Erro ao enviar.', 'error');
                 }
             } catch (err) {
                 showToast('Erro de conexão.', 'error');
@@ -76,7 +80,7 @@ https://github.com/edukovack-sketch/vida-leve.gitdocument.addEventListener('DOMC
                 btn.textContent = originalText;
             }
         });
-    }
+    });
 
     // Hero feature slider — rolagem infinita pra esquerda (direita→esquerda), sem voltar
     const slider = document.getElementById('hero-slider');

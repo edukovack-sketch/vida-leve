@@ -100,7 +100,7 @@ def index():
 @app.route('/contato', methods=['GET', 'POST'])
 def contato():
     if request.method == 'GET':
-        return render_template('contato.html')
+        return redirect(url_for('index') + '#contato')
 
     nome = sanitizar(request.form.get('nome', ''))
     telefone = sanitizar(request.form.get('telefone', ''))
@@ -122,11 +122,12 @@ def contato():
 
 @app.route('/portfolio')
 def portfolio():
-    return render_template('portfolio.html')
+    return redirect(url_for('index') + '#portfolio')
+
 
 @app.route('/servicos')
 def servicos():
-    return render_template('servicos.html')
+    return redirect(url_for('index') + '#servicos')
 
 
 @app.route('/sobre')
@@ -194,6 +195,10 @@ def admin():
         'SELECT * FROM orcamentos ORDER BY criado_em DESC LIMIT 10'
     ).fetchall()
 
+    trafego_hoje = conn.execute(
+        "SELECT COUNT(*) FROM trafego WHERE DATE(criado_em) = DATE('now')"
+    ).fetchone()[0]
+
     conn.close()
 
     return render_template('admin.html',
@@ -203,7 +208,8 @@ def admin():
         labels=dias,
         dados=contagem,
         contatos_recentes=contatos_recentes,
-        orcamentos_recentes=orcamentos_recentes
+        orcamentos_recentes=orcamentos_recentes,
+        trafego_hoje=trafego_hoje
     )
 
 @app.route('/admin/contatos')

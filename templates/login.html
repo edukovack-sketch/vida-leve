@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Vida Leve</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card glass">
+      <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Vida Leve" style="height:64px;margin-bottom:16px;">
+      <h2>Painel Administrativo</h2>
+      <p class="subtitle">Acesse com suas credenciais</p>
+
+      {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens %}
+          {% for categoria, msg in mensagens %}
+            <div class="flash flash-{{ categoria }}">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('login') }}">
+        <div class="form-group">
+          <label for="username">Usuário</label>
+          <input id="username" type="text" name="username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="senha">Senha</label>
+          <input id="senha" type="password" name="senha" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-cta" style="width:100%;">Entrar</button>
+      </form>
+
+      <p style="margin-top:24px;"><a href="{{ url_for('index') }}" style="color:var(--cian);">&larr; Voltar ao site</a></p>
+    </div>
+  </div>
+</body>
+</html>

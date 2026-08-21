@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contatos - Vida Leve</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="navbar glass" id="navbar">
+    <div class="container nav-container">
+      <a href="{{ url_for('index') }}" class="logo"><img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Vida Leve"></a>
+      <nav class="nav-links">
+        <a href="{{ url_for('index') }}">Ver site</a>
+        <a href="{{ url_for('admin') }}">Painel</a>
+        <a href="{{ url_for('logout') }}">Sair</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="dashboard">
+    <div class="container">
+      <div class="dashboard-header">
+        <div>
+          <h1>Mensagens de contato</h1>
+          <p style="color:var(--gray);">{{ contatos|length }} registro(s)</p>
+        </div>
+      </div>
+
+      {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens %}
+          {% for categoria, msg in mensagens %}
+            <div class="flash flash-{{ categoria }}">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <table class="dados-table">
+        <thead>
+          <tr><th>Nome</th><th>Telefone</th><th>E-mail</th><th>Mensagem</th><th>Data</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for c in contatos %}
+          <tr>
+            <td>{{ c['nome'] }}</td>
+            <td>{{ c['telefone'] or '-' }}</td>
+            <td>{{ c['email'] or '-' }}</td>
+            <td>{{ c['mensagem'] }}</td>
+            <td>{{ c['criado_em'] }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('apagar_contato', id=c['id']) }}" onsubmit="return confirm('Excluir este contato?');">
+                <button type="submit" class="btn-delete" style="background:none;border:1px solid #ff4d4d;color:#ff4d4d;padding:6px 12px;border-radius:6px;cursor:pointer;">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" style="text-align:center;">Nenhuma mensagem ainda.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

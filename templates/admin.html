@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel - Vida Leve</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="navbar glass" id="navbar">
+    <div class="container nav-container">
+      <a href="{{ url_for('index') }}" class="logo"><img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Vida Leve"></a>
+      <nav class="nav-links">
+        <a href="{{ url_for('index') }}">Ver site</a>
+        <a href="{{ url_for('admin_contatos') }}">Contatos</a>
+        <a href="{{ url_for('logout') }}">Sair</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="dashboard">
+    <div class="container">
+      <div class="dashboard-header">
+        <div>
+          <h1>Olá, {{ session['username'] }}</h1>
+          <p style="color:var(--gray);">Resumo do seu negócio</p>
+        </div>
+        <span style="color:var(--gray);">Tráfego hoje: <strong style="color:var(--primary);">{{ trafego_hoje }}</strong></span>
+      </div>
+
+      {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% if mensagens %}
+          {% for categoria, msg in mensagens %}
+            <div class="flash flash-{{ categoria }}">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <div class="stat-cards">
+        <div class="stat-card">
+          <div class="number">{{ total_contatos }}</div>
+          <div class="label">Mensagens de contato</div>
+        </div>
+        <div class="stat-card">
+          <div class="number">{{ total_orcamentos }}</div>
+          <div class="label">Orçamentos</div>
+        </div>
+        <div class="stat-card">
+          <div class="number">{{ pendentes }}</div>
+          <div class="label">Orçamentos pendentes</div>
+        </div>
+      </div>
+
+      <div class="dashboard-chart" style="background:var(--dark-glass);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius);padding:24px;margin-bottom:40px;">
+        <h3 style="margin-bottom:16px;">Mensagens nos últimos 7 dias</h3>
+        <canvas id="statsChart" height="120"></canvas>
+      </div>
+
+      <div class="recent-section">
+        <h3 style="margin-bottom:16px;">Contatos recentes</h3>
+        <table class="dados-table">
+          <thead>
+            <tr><th>Nome</th><th>Telefone</th><th>E-mail</th><th>Mensagem</th><th>Data</th></tr>
+          </thead>
+          <tbody>
+            {% for c in contatos_recentes %}
+            <tr>
+              <td>{{ c['nome'] }}</td>
+              <td>{{ c['telefone'] or '-' }}</td>
+              <td>{{ c['email'] or '-' }}</td>
+              <td>{{ c['mensagem'][:60] }}</td>
+              <td>{{ c['criado_em'][:10] }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" style="text-align:center;">Nenhum contato ainda.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    const ctx = document.getElementById('statsChart');
+    if (ctx) {
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: {{ labels | tojson }},
+          datasets: [{
+            label: 'Contatos',
+            data: {{ dados | tojson }},
+            backgroundColor: 'rgba(0, 229, 255, 0.6)',
+            borderColor: '#00e5ff',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { labels: { color: '#9e9e9e' } } },
+          scales: {
+            x: { ticks: { color: '#9e9e9e' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#9e9e9e' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
